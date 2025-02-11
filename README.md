@@ -2,14 +2,14 @@
   <a href="http://nestjs.com/" target="blank">
     <img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" />
   </a>
-  <a href="https://kafka.js.org">
-    <img src="https://raw.githubusercontent.com/tulios/kafkajs/master/logo/v2/kafkajs_circle.svg" alt="KafkaJS Logo" width="125" height="125">
+  <a href="https://www.elastic.co/">
+    <img src="https://cdn.worldvectorlogo.com/logos/elasticsearch.svg" alt="Elasticsearch Logo" width="125" height="125">
   </a>
 </p>
 
-# NestJS + KafkaJS
+# NestJS + Elasticsearch
 
-Integration of KafkaJS with NestJS to build event driven microservices.
+Integration of Elasticsearch with NestJS to build event driven microservices.
 
 
 ## Setup

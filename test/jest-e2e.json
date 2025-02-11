@@ -1,0 +1,43 @@
+{
+  "moduleFileExtensions": [
+    "js",
+    "json",
+    "ts"
+  ],
+  "rootDir": ".",
+  "testEnvironment": "node",
+  "testRegex": ".e2e-spec.ts$",
+  "transform": {
+    "^.+\\.(t|j)s$": "ts-jest"
+  },
+  "moduleNameMapper": {
+    "@app/alt-queue-manager/(.*)": "<rootDir>/../libs/alt-queue-manager/src/$1",
+    "@app/alt-queue-manager": "<rootDir>/../libs/alt-queue-manager/src",
+    "@app/alt-logging/(.*)": "<rootDir>/../libs/alt-logging/src/$1",
+    "@app/alt-logging": "<rootDir>/../libs/alt-logging/src",
+    "@alti/cache-manager/(.*)": "<rootDir>/../libs/cache-manager/src/$1",
+    "@alti/cache-manager": "<rootDir>/../libs/cache-manager/src",
+    "@alti/logging/(.*)": "<rootDir>/../libs/logging/src/$1",
+    "@alti/logging": "<rootDir>/../libs/logging/src",
+    "@alti/queue-manager/(.*)": "<rootDir>/../libs/queue-manager/src/$1",
+    "@alti/queue-manager": "<rootDir>/../libs/queue-manager/src",
+    "@alti/apple-auth/(.*)": "<rootDir>/../libs/apple-auth/src/$1",
+    "@alti/apple-auth": "<rootDir>/../libs/apple-auth/src",
+    "@alti/galileo-ft/(.*)": "<rootDir>/../libs/galileo-ft/src/$1",
+    "@alti/galileo-ft": "<rootDir>/../libs/galileo-ft/src",
+    "@alti/e-mailer/(.*)": "<rootDir>/../libs/e-mailer/src/$1",
+    "@alti/e-mailer": "<rootDir>/../libs/e-mailer/src",
+    "@alti/braintree-ft/(.*)": "<rootDir>/../libs/braintree-ft/src/$1",
+    "@alti/braintree-ft": "<rootDir>/../libs/braintree-ft/src",
+    "@alti/sms-sender/(.*)": "<rootDir>/../libs/sms-sender/src/$1",
+    "@alti/sms-sender": "<rootDir>/../libs/sms-sender/src",
+    "@alti/sql-fixtures/(.*)": "<rootDir>/../libs/sql-fixtures/src/$1",
+    "@alti/sql-fixtures": "<rootDir>/../libs/sql-fixtures/src",
+    "@alti/notifications/(.*)": "<rootDir>/../libs/notifications/src/$1",
+    "@alti/notifications": "<rootDir>/../libs/notifications/src",
+    "@alti/database/(.*)": "<rootDir>/../libs/database/src/$1",
+    "@alti/database": "<rootDir>/../libs/database/src",
+    "@ali/elasticsearch/(.*)": "<rootDir>/../libs/elasticsearch/src/$1",
+    "@ali/elasticsearch": "<rootDir>/../libs/elasticsearch/src"
+  }
+}

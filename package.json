@@ -1,12 +1,13 @@
 {
   "name": "@alti-js/nestjs-elasticsearch",
-  "version": "0.3.0",
-  "description": "Elasticsearch integration with NestJS",
+  "version": "0.5.0",
+  "description": "Elasticsearch and OpenSearch integration with NestJS - Dual engine support with unified API and multi-region capabilities",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
     "build": "nest build",
     "prepare": "tsc --project tsconfig.build.json",
+    "prepublishOnly": "npm run build && npm test",
     "test": "jest",
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
     "test:watch": "jest --watch",
@@ -20,7 +21,16 @@
   },
   "keywords": [
     "nestjs",
-    "elasticsearch"
+    "elasticsearch",
+    "opensearch",
+    "search",
+    "indexing",
+    "typescript",
+    "nodejs",
+    "dual-engine",
+    "unified-api",
+    "multi-region",
+    "clustering"
   ],
   "author": "Angel Sanchez",
   "license": "MIT",
@@ -28,8 +38,17 @@
     "url": "https://github.com/alti-js/nestjs-elasticsearch/issues"
   },
   "homepage": "https://github.com/alti-js/nestjs-elasticsearch/#readme",
+  "engines": {
+    "node": ">=16.0.0",
+    "npm": ">=8.0.0"
+  },
+  "peerDependencies": {
+    "@nestjs/common": "^10.0.0",
+    "@nestjs/core": "^10.0.0"
+  },
   "dependencies": {
     "@elastic/elasticsearch": "^7.13.0",
+    "@opensearch-project/opensearch": "^2.4.0",
     "@nestjs/common": "^10.4.15",
     "@nestjs/core": "^10.4.15",
     "@nestjs/microservices": "^10.4.15",

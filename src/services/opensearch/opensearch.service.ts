@@ -1,21 +1,25 @@
 import { Injectable, Inject, Logger } from '@nestjs/common';
-import * as elasticsearch from '@elastic/elasticsearch';
-import { IElasticSearchConfig } from './models/dtos/config.dto';
-import { IField } from './models/dtos/field.dto';
-import { ISearchService } from './models/core/base-search.service';
+import { Client } from '@opensearch-project/opensearch';
+import { IOpenSearchConfig } from '../../models/dtos/config.dto';
+import { IField } from '../../models/dtos/field.dto';
+import { ISearchService } from '../../models/core/base-search.service';
 
 @Injectable()
-export class ElasticsearchService implements ISearchService {
-  private readonly logger: Logger = new Logger(ElasticsearchService.name);
-  private readonly IElasticSearchConfig: IElasticSearchConfig;
-  private readonly esclient: elasticsearch.Client;
+export class OpenSearchService implements ISearchService {
+  private readonly logger: Logger = new Logger(OpenSearchService.name);
+  private readonly config: IOpenSearchConfig;
+  private readonly client: Client;
 
   constructor(
-    @Inject('ELASTICSEARCH_CONFIG') private options: IElasticSearchConfig,
+    @Inject('OPENSEARCH_CONFIG') private options: IOpenSearchConfig,
   ) {
-    this.IElasticSearchConfig = options;
-    this.esclient = new elasticsearch.Client({
-      node: `${this.IElasticSearchConfig.node}:${this.IElasticSearchConfig.port}`,
+    this.config = options;
+    this.client = new Client({
+      node: `${this.config.node}:${this.config.port}`,
+      auth: {
+        username: this.config.auth.username,
+        password: this.config.auth.password,
+      },
     });
   }
 
@@ -26,19 +30,19 @@ export class ElasticsearchService implements ISearchService {
           Object.assign(obj, { [item.fieldName]: { type: item.type } }),
         {},
       );
-      const existsStatus = await this.esclient.indices.exists({
+      const existsStatus = await this.client.indices.exists({
         index: indexName,
       });
 
       if (existsStatus && existsStatus.statusCode === 200) {
-        return this.esclient.indices.putMapping({
+        return this.client.indices.putMapping({
           index: indexName,
           body: {
             properties: fieldsList,
           },
         });
       } else {
-        return this.esclient.indices.create({
+        return this.client.indices.create({
           index: indexName,
           body: {
             mappings: {
@@ -62,7 +66,7 @@ export class ElasticsearchService implements ISearchService {
       bulk.push(doc);
     });
     try {
-      return this.esclient.bulk({
+      return this.client.bulk({
         body: bulk,
       });
     } catch (e) {
@@ -86,7 +90,7 @@ export class ElasticsearchService implements ISearchService {
       query: query,
     };
     try {
-      return this.esclient.search({ index: index, body });
+      return this.client.search({ index: index, body });
     } catch (e) {
       this.logger.error(e);
       throw e;
@@ -103,7 +107,7 @@ export class ElasticsearchService implements ISearchService {
       preparedUpdatedFields += `ctx._source["${property}"] = "${updatedFields[property]}";`;
     }
     try {
-      return this.esclient.updateByQuery({
+      return this.client.updateByQuery({
         index: index,
         refresh: true,
         body: {
@@ -122,7 +126,7 @@ export class ElasticsearchService implements ISearchService {
 
   async removeDocumentFromIndex(indexName: string, query: any): Promise<any> {
     try {
-      return this.esclient.deleteByQuery({
+      return this.client.deleteByQuery({
         index: indexName,
         body: {
           query: query,
@@ -140,7 +144,7 @@ export class ElasticsearchService implements ISearchService {
     query: any,
   ): Promise<any> {
     try {
-      return this.esclient.reindex({
+      return this.client.reindex({
         refresh: true,
         body: {
           source: {
@@ -170,4 +174,4 @@ export class ElasticsearchService implements ISearchService {
     }
     return {};
   }
-}
+} 

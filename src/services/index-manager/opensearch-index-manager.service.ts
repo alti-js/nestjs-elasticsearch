@@ -1,6 +1,6 @@
 import { Inject, Injectable, Logger } from '@nestjs/common';
-import * as elasticsearch from '@elastic/elasticsearch';
-import { IElasticSearchConfig } from '../../models/dtos/config.dto';
+import { Client } from '@opensearch-project/opensearch';
+import { IOpenSearchConfig } from '../../models/dtos/config.dto';
 import { IField } from '../../models/dtos/field.dto';
 import { BaseDocument } from '../../models/core/base-index.model';
 import { getIndexName } from '../../helpers/index-name.helper';
@@ -14,16 +14,19 @@ export interface IndexConfig {
 }
 
 @Injectable()
-export class IndexManagerService {
-  private readonly esclient: elasticsearch.Client;
-  private readonly logger = new Logger(IndexManagerService.name);
+export class OpenSearchIndexManagerService {
+  private readonly client: Client;
+  private readonly logger = new Logger(OpenSearchIndexManagerService.name);
 
   constructor(
-    @Inject('ELASTICSEARCH_CONFIG') private readonly options: IElasticSearchConfig,
+    @Inject('OPENSEARCH_CONFIG') private readonly options: IOpenSearchConfig,
   ) {
-    this.esclient = new elasticsearch.Client({
+    this.client = new Client({
       node: `${this.options.node}:${this.options.port}`,
-      auth: this.options.auth,
+      auth: {
+        username: this.options.auth.username,
+        password: this.options.auth.password,
+      },
     });
   }
 
@@ -36,14 +39,14 @@ export class IndexManagerService {
       } = {};
       const {
         body: { version },
-      } = await this.esclient.info();
+      } = await this.client.info();
       if (this.options.models) {
         const models: (new <T extends BaseDocument<any>>(
-          client: elasticsearch.Client,
+          client: Client,
         ) => T)[] = this.options.models;
         for (const model of models) {
           const metadata = model.prototype;
-          model.prototype.client = this.esclient;
+          model.prototype.client = this.client;
           model.prototype.version = version.number;
           model.prototype.logger = new Logger(model.name);
           const indexName = getIndexName(
@@ -79,18 +82,18 @@ export class IndexManagerService {
     indexName: string,
     type: string,
     fields: IField[],
-  ): Promise<elasticsearch.ApiResponse> {
+  ): Promise<any> {
     try {
       let fieldsList = {};
       fields.forEach(({ defaultValue, fieldName, ...config }: IField) => {
         fieldsList = { ...fieldsList, [fieldName]: config };
       });
-      const existsStatus = await this.esclient.indices.exists({
+      const existsStatus = await this.client.indices.exists({
         index: indexName,
       });
-      let index: elasticsearch.ApiResponse;
+      let index: any;
       if (!existsStatus || existsStatus.statusCode !== 200) {
-        index = await this.esclient.indices.create({
+        index = await this.client.indices.create({
           index: indexName,
           body: {
             settings: {
@@ -98,13 +101,13 @@ export class IndexManagerService {
             },
           },
         });
-        this.logger.log(`Elasticsearch Index created: ${indexName}`);
+        this.logger.log(`OpenSearch Index created: ${indexName}`);
       } else {
-        index = await this.esclient.indices.get({
+        index = await this.client.indices.get({
           index: indexName,
           expand_wildcards: 'all',
         });
-        this.logger.log(`Elasticsearch Index exists: ${indexName}`);
+        this.logger.log(`OpenSearch Index exists: ${indexName}`);
       }
       const mappings = index.body[indexName]?.mappings;
       let skipMapping = true;
@@ -124,8 +127,8 @@ export class IndexManagerService {
         skipMapping = false;
       }
       if (!skipMapping) {
-        this.logger.log(`Elasticsearch Mapping puted: ${indexName}/${type}`);
-        index = await this.esclient.indices.putMapping({
+        this.logger.log(`OpenSearch Mapping put: ${indexName}/${type}`);
+        index = await this.client.indices.putMapping({
           index: indexName,
           body,
         });
@@ -136,4 +139,4 @@ export class IndexManagerService {
       throw e;
     }
   }
-}
+} 

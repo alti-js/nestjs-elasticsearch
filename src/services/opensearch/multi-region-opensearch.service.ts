@@ -12,15 +12,23 @@ import { IField } from '../../models/dtos/field.dto';
 export class MultiRegionOpenSearchService {
   private readonly logger: Logger = new Logger(MultiRegionOpenSearchService.name);
   private readonly config: IMultiRegionOpenSearchConfig;
-  private readonly clients: Map<Region, Client> = new Map();
-  private readonly defaultRegion: Region;
+  private readonly clients: Map<string, Client> = new Map();
+  private readonly defaultRegion: string;
 
   constructor(
     @Inject('MULTI_REGION_OPENSEARCH_CONFIG') private options: IMultiRegionOpenSearchConfig,
   ) {
     this.config = options;
-    this.defaultRegion = options.defaultRegion || 'singapore';
+    this.defaultRegion = options.defaultRegion || this.getFirstAvailableRegion();
     this.initializeClients();
+  }
+
+  private getFirstAvailableRegion(): string {
+    const regions = Object.keys(this.config.regions);
+    if (regions.length === 0) {
+      throw new Error('No regions configured');
+    }
+    return regions[0];
   }
 
   private initializeClients(): void {
@@ -32,12 +40,12 @@ export class MultiRegionOpenSearchService {
           password: clusterConfig.auth.password,
         },
       });
-      this.clients.set(region as Region, client);
+      this.clients.set(region, client);
       this.logger.log(`Initialized OpenSearch client for region: ${region}`);
     });
   }
 
-  private getClient(region: Region): Client {
+  private getClient(region: string): Client {
     const client = this.clients.get(region);
     if (!client) {
       throw new Error(`No OpenSearch client found for region: ${region}`);
@@ -45,14 +53,14 @@ export class MultiRegionOpenSearchService {
     return client;
   }
 
-  private getIndexName(region: Region, baseIndex: string): string {
+  private getIndexName(region: string, baseIndex: string): string {
     const prefix = this.config.indexPrefix || '';
     return `${prefix}${baseIndex}-${region}`;
   }
 
   // ===== SINGLE DOCUMENT CRUD OPERATIONS =====
 
-  async addDocument(region: Region, baseIndex: string, document: any, documentId?: string): Promise<any> {
+  async addDocument(region: string, baseIndex: string, document: any, documentId?: string): Promise<any> {
     try {
       const client = this.getClient(region);
       const indexName = this.getIndexName(region, baseIndex);
@@ -75,7 +83,7 @@ export class MultiRegionOpenSearchService {
     }
   }
 
-  async getDocument(region: Region, baseIndex: string, documentId: string): Promise<any> {
+  async getDocument(region: string, baseIndex: string, documentId: string): Promise<any> {
     try {
       const client = this.getClient(region);
       const indexName = this.getIndexName(region, baseIndex);
@@ -93,7 +101,7 @@ export class MultiRegionOpenSearchService {
     }
   }
 
-  async updateDocument(region: Region, baseIndex: string, documentId: string, document: any): Promise<any> {
+  async updateDocument(region: string, baseIndex: string, documentId: string, document: any): Promise<any> {
     try {
       const client = this.getClient(region);
       const indexName = this.getIndexName(region, baseIndex);
@@ -113,7 +121,7 @@ export class MultiRegionOpenSearchService {
     }
   }
 
-  async deleteDocument(region: Region, baseIndex: string, documentId: string): Promise<any> {
+  async deleteDocument(region: string, baseIndex: string, documentId: string): Promise<any> {
     try {
       const client = this.getClient(region);
       const indexName = this.getIndexName(region, baseIndex);
@@ -130,7 +138,7 @@ export class MultiRegionOpenSearchService {
     }
   }
 
-  async upsertDocument(region: Region, baseIndex: string, documentId: string, document: any): Promise<any> {
+  async upsertDocument(region: string, baseIndex: string, documentId: string, document: any): Promise<any> {
     try {
       const client = this.getClient(region);
       const indexName = this.getIndexName(region, baseIndex);
@@ -153,7 +161,7 @@ export class MultiRegionOpenSearchService {
 
   // ===== BULK OPERATIONS =====
 
-  async bulkInsert(region: Region, baseIndex: string, docs: any[]): Promise<any> {
+  async bulkInsert(region: string, baseIndex: string, docs: any[]): Promise<any> {
     try {
       const client = this.getClient(region);
       const indexName = this.getIndexName(region, baseIndex);
@@ -180,7 +188,7 @@ export class MultiRegionOpenSearchService {
   // ===== SEARCH OPERATIONS =====
 
   async searchIndex(
-    region: Region,
+    region: string,
     baseIndex: string,
     q: string,
     skip: number,
@@ -210,7 +218,7 @@ export class MultiRegionOpenSearchService {
 
   // ===== INDEX OPERATIONS =====
 
-  async createIndex(region: Region, baseIndex: string, fields: IField[]): Promise<any> {
+  async createIndex(region: string, baseIndex: string, fields: IField[]): Promise<any> {
     try {
       const client = this.getClient(region);
       const indexName = this.getIndexName(region, baseIndex);
@@ -250,7 +258,7 @@ export class MultiRegionOpenSearchService {
     }
   }
 
-  async deleteIndex(region: Region, baseIndex: string): Promise<any> {
+  async deleteIndex(region: string, baseIndex: string): Promise<any> {
     try {
       const client = this.getClient(region);
       const indexName = this.getIndexName(region, baseIndex);
@@ -266,7 +274,7 @@ export class MultiRegionOpenSearchService {
     }
   }
 
-  async indexExists(region: Region, baseIndex: string): Promise<boolean> {
+  async indexExists(region: string, baseIndex: string): Promise<boolean> {
     try {
       const client = this.getClient(region);
       const indexName = this.getIndexName(region, baseIndex);
@@ -290,10 +298,10 @@ export class MultiRegionOpenSearchService {
     limit: number,
     queryType: string,
     fields: string[],
-    regions?: Region[]
+    regions?: string[]
   ): Promise<any> {
     try {
-      const targetRegions = regions || Object.keys(this.config.regions) as Region[];
+      const targetRegions = regions || Object.keys(this.config.regions);
       const searchPromises = targetRegions.map(region => 
         this.searchIndex(region, baseIndex, q, skip, limit, queryType, fields)
       );
@@ -329,10 +337,10 @@ export class MultiRegionOpenSearchService {
   async bulkInsertAcrossRegions(
     baseIndex: string,
     docs: any[],
-    regions?: Region[]
+    regions?: string[]
   ): Promise<any> {
     try {
-      const targetRegions = regions || Object.keys(this.config.regions) as Region[];
+      const targetRegions = regions || Object.keys(this.config.regions);
       const insertPromises = targetRegions.map(region => 
         this.bulkInsert(region, baseIndex, docs)
       );
@@ -376,15 +384,15 @@ export class MultiRegionOpenSearchService {
     return {};
   }
 
-  getAvailableRegions(): Region[] {
-    return Object.keys(this.config.regions) as Region[];
+  getAvailableRegions(): string[] {
+    return Object.keys(this.config.regions);
   }
 
-  getDefaultRegion(): Region {
+  getDefaultRegion(): string {
     return this.defaultRegion;
   }
 
-  getClusterConfig(region: Region): IClusterConfig {
+  getClusterConfig(region: string): IClusterConfig {
     return this.config.regions[region];
   }
 

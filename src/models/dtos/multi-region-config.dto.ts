@@ -1,6 +1,6 @@
 import { IAuthConfigOptions, SearchEngineType } from './config.dto';
 
-export type Region = 'singapore' | 'indonesia' | 'australia' | 'thailand';
+export type Region = string;
 
 export interface IClusterConfig {
   node: string;
@@ -13,9 +13,9 @@ export interface IClusterConfig {
 export interface IMultiRegionOpenSearchConfig {
   engine: 'opensearch';
   regions: {
-    [key in Region]: IClusterConfig;
+    [regionName: string]: IClusterConfig;
   };
-  defaultRegion?: Region;
+  defaultRegion?: string;
   indexPrefix?: string;
   models?: (new (data?: any) => any)[];
 }
@@ -23,9 +23,9 @@ export interface IMultiRegionOpenSearchConfig {
 export interface IMultiRegionElasticSearchConfig {
   engine: 'elasticsearch';
   regions: {
-    [key in Region]: IClusterConfig;
+    [regionName: string]: IClusterConfig;
   };
-  defaultRegion?: Region;
+  defaultRegion?: string;
   indexPrefix?: string;
   models?: (new (data?: any) => any)[];
 }
@@ -33,6 +33,6 @@ export interface IMultiRegionElasticSearchConfig {
 export type MultiRegionSearchConfig = IMultiRegionOpenSearchConfig | IMultiRegionElasticSearchConfig;
 
 export interface IRegionRequest {
-  region: Region;
+  region: string;
   [key: string]: any;
 } 

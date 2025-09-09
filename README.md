@@ -129,26 +129,26 @@ import { MultiRegionElasticsearchModule } from '@alti-js/nestjs-elasticsearch';
 
 const multiRegionConfig = {
   engine: 'opensearch' as const,
-  defaultRegion: 'singapore' as const,
+  defaultRegion: 'us-east-1', // Can be any region name you define
   indexPrefix: 'myapp',
   regions: {
-    singapore: {
-      node: 'https://opensearch-sg.example.com',
+    'us-east-1': {
+      node: 'https://opensearch-us-east-1.example.com',
       port: '9200',
       auth: { username: 'admin', password: 'password' }
     },
-    indonesia: {
-      node: 'https://opensearch-id.example.com',
+    'us-west-2': {
+      node: 'https://opensearch-us-west-2.example.com',
       port: '9200',
       auth: { username: 'admin', password: 'password' }
     },
-    australia: {
-      node: 'https://opensearch-au.example.com',
+    'eu-central-1': {
+      node: 'https://opensearch-eu-central-1.example.com',
       port: '9200',
       auth: { username: 'admin', password: 'password' }
     },
-    thailand: {
-      node: 'https://opensearch-th.example.com',
+    'ap-southeast-1': {
+      node: 'https://opensearch-ap-southeast-1.example.com',
       port: '9200',
       auth: { username: 'admin', password: 'password' }
     }
@@ -173,7 +173,7 @@ export class AppModule {}
 | `auth` | object | Authentication credentials | Yes | - |
 | `engine` | 'elasticsearch' \| 'opensearch' | Search engine type | No | 'elasticsearch' |
 | `models` | array | Search models for auto-indexing | No | [] |
-| `defaultRegion` | Region | Default region for multi-region setup | No | 'singapore' |
+| `defaultRegion` | string | Default region for multi-region setup | No | First configured region |
 | `indexPrefix` | string | Prefix for index names | No | '' |
 
 ## 📋 Models
@@ -455,14 +455,17 @@ export class MultiRegionPostService {
 | `deleteDocumentByRequest` | Delete document using request region | `(request, indexName, documentId)` |
 | `searchByRequest` | Search using request region | `(request, indexName, query, skip, limit, queryType, fields)` |
 
-## 🌍 Supported Regions
+## 🌍 Configurable Regions
 
-The multi-region functionality supports the following regions:
+The multi-region functionality now supports **any custom region names** that you define in your configuration. You are no longer limited to predefined regions and can use any naming convention that suits your infrastructure:
 
-- **🇸🇬 Singapore** (`singapore`)
-- **🇮🇩 Indonesia** (`indonesia`)
-- **🇦🇺 Australia** (`australia`)
-- **🇹🇭 Thailand** (`thailand`)
+**Examples of region configurations:**
+- **AWS-style regions**: `us-east-1`, `us-west-2`, `eu-central-1`, `ap-southeast-1`
+- **Geographic regions**: `north-america`, `europe`, `asia-pacific`
+- **Custom naming**: `production-east`, `staging-west`, `datacenter-1`
+- **Country codes**: `usa`, `canada`, `germany`, `singapore`
+
+Simply define your regions in the configuration object with any string identifiers you prefer.
 
 ## 🔄 Migration Guide
 
@@ -516,14 +519,19 @@ ElasticsearchModule.forRoot({
 // After (Multi-Region)
 MultiRegionElasticsearchModule.forRoot({
   engine: 'opensearch',
-  defaultRegion: 'singapore',
+  defaultRegion: 'primary', // Any region name you define
   regions: {
-    singapore: {
+    primary: {
       node: 'http://localhost:9200',
       port: '9200',
       auth: { username: 'admin', password: 'admin' }
     },
-    // Add more regions as needed
+    // Add more regions with any names you prefer
+    secondary: {
+      node: 'http://localhost:9201',
+      port: '9201',
+      auth: { username: 'admin', password: 'admin' }
+    }
   }
 })
 ```

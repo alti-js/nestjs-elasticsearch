@@ -8,7 +8,7 @@
     "build": "nest build",
     "prepare": "tsc --project tsconfig.build.json",
     "prepublishOnly": "npm run build && npm test",
-    "publish:public": "npm version patch && npm publish --access public",
+    "publish:public": "npm run build && npm version patch && npm publish --access public",
     "test": "jest",
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
     "test:watch": "jest --watch",

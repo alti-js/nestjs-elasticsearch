@@ -8,6 +8,80 @@ import {
 } from '../../models/dtos/multi-region-config.dto';
 import { IField } from '../../models/dtos/field.dto';
 
+interface OpenSearchIndexParams {
+  index: string;
+  body: Record<string, unknown>;
+  id?: string;
+}
+
+interface OpenSearchGetParams {
+  index: string;
+  id: string;
+}
+
+interface OpenSearchUpdateParams {
+  index: string;
+  id: string;
+  body: {
+    doc: Record<string, unknown>;
+  };
+}
+
+interface OpenSearchDeleteParams {
+  index: string;
+  id: string;
+}
+
+interface OpenSearchSearchParams {
+  index: string;
+  body: Record<string, unknown>;
+}
+
+interface OpenSearchBulkParams {
+  body: Array<Record<string, unknown>>;
+}
+
+interface OpenSearchCreateIndexParams {
+  index: string;
+  body: {
+    mappings?: {
+      properties: Record<string, unknown>;
+    };
+    settings?: Record<string, unknown>;
+  };
+}
+
+interface OpenSearchIndexExistsParams {
+  index: string;
+}
+
+interface OpenSearchDeleteIndexParams {
+  index: string;
+}
+
+interface OpenSearchResponse<T = Record<string, unknown>> {
+  body: T;
+  statusCode?: number;
+  headers?: Record<string, string>;
+}
+
+interface OpenSearchSearchResult {
+  hits: {
+    total?: {
+      value: number;
+      relation?: string;
+    };
+    hits: Array<{
+      _index: string;
+      _id: string;
+      _score: number;
+      _source: Record<string, unknown>;
+    }>;
+  };
+  took: number;
+  timed_out: boolean;
+}
+
 @Injectable()
 export class MultiRegionOpenSearchService {
   private readonly logger: Logger = new Logger(MultiRegionOpenSearchService.name);
@@ -60,14 +134,14 @@ export class MultiRegionOpenSearchService {
 
   // ===== SINGLE DOCUMENT CRUD OPERATIONS =====
 
-  async addDocument(region: string, baseIndex: string, document: any, documentId?: string): Promise<any> {
+  async addDocument(region: string, baseIndex: string, document: Record<string, unknown>, documentId?: string): Promise<OpenSearchResponse> {
     try {
       const client = this.getClient(region);
       const indexName = this.getIndexName(region, baseIndex);
       
       this.logger.log(`Adding document to region: ${region}, index: ${indexName}`);
       
-      const params: any = {
+      const params: OpenSearchIndexParams = {
         index: indexName,
         body: document,
       };
@@ -83,7 +157,7 @@ export class MultiRegionOpenSearchService {
     }
   }
 
-  async getDocument(region: string, baseIndex: string, documentId: string): Promise<any> {
+  async getDocument(region: string, baseIndex: string, documentId: string): Promise<Record<string, unknown>> {
     try {
       const client = this.getClient(region);
       const indexName = this.getIndexName(region, baseIndex);
@@ -93,15 +167,16 @@ export class MultiRegionOpenSearchService {
       const response = await client.get({
         index: indexName,
         id: documentId,
-      });
-      return response.body._source;
+      } as OpenSearchGetParams);
+      
+      return response.body._source as Record<string, unknown>;
     } catch (e) {
       this.logger.error(`Failed to get document from region ${region}:`, e);
       throw e;
     }
   }
 
-  async updateDocument(region: string, baseIndex: string, documentId: string, document: any): Promise<any> {
+  async updateDocument(region: string, baseIndex: string, documentId: string, document: Record<string, unknown>): Promise<OpenSearchResponse> {
     try {
       const client = this.getClient(region);
       const indexName = this.getIndexName(region, baseIndex);
@@ -114,14 +189,14 @@ export class MultiRegionOpenSearchService {
         body: {
           doc: document,
         },
-      });
+      } as OpenSearchUpdateParams);
     } catch (e) {
       this.logger.error(`Failed to update document in region ${region}:`, e);
       throw e;
     }
   }
 
-  async deleteDocument(region: string, baseIndex: string, documentId: string): Promise<any> {
+  async deleteDocument(region: string, baseIndex: string, documentId: string): Promise<OpenSearchResponse> {
     try {
       const client = this.getClient(region);
       const indexName = this.getIndexName(region, baseIndex);
@@ -131,14 +206,14 @@ export class MultiRegionOpenSearchService {
       return await client.delete({
         index: indexName,
         id: documentId,
-      });
+      } as OpenSearchDeleteParams);
     } catch (e) {
       this.logger.error(`Failed to delete document from region ${region}:`, e);
       throw e;
     }
   }
 
-  async upsertDocument(region: string, baseIndex: string, documentId: string, document: any): Promise<any> {
+  async upsertDocument(region: string, baseIndex: string, documentId: string, document: Record<string, unknown>): Promise<OpenSearchResponse> {
     try {
       const client = this.getClient(region);
       const indexName = this.getIndexName(region, baseIndex);
@@ -152,7 +227,7 @@ export class MultiRegionOpenSearchService {
           doc: document,
           doc_as_upsert: true,
         },
-      });
+      } as OpenSearchUpdateParams);
     } catch (e) {
       this.logger.error(`Failed to upsert document in region ${region}:`, e);
       throw e;
@@ -161,14 +236,14 @@ export class MultiRegionOpenSearchService {
 
   // ===== BULK OPERATIONS =====
 
-  async bulkInsert(region: string, baseIndex: string, docs: any[]): Promise<any> {
+  async bulkInsert(region: string, baseIndex: string, docs: Record<string, unknown>[]): Promise<OpenSearchResponse> {
     try {
       const client = this.getClient(region);
       const indexName = this.getIndexName(region, baseIndex);
       
       this.logger.log(`Bulk inserting ${docs.length} documents to region: ${region}, index: ${indexName}`);
       
-      const bulk = [];
+      const bulk: Array<Record<string, unknown>> = [];
       docs.forEach((doc) => {
         bulk.push({
           index: { _index: indexName },
@@ -178,7 +253,7 @@ export class MultiRegionOpenSearchService {
       
       return await client.bulk({
         body: bulk,
-      });
+      } as OpenSearchBulkParams);
     } catch (e) {
       this.logger.error(`Failed to bulk insert to region ${region}:`, e);
       throw e;
@@ -195,7 +270,7 @@ export class MultiRegionOpenSearchService {
     limit: number,
     queryType: string,
     fields: string[],
-  ): Promise<any> {
+  ): Promise<OpenSearchResponse> {
     try {
       const client = this.getClient(region);
       const indexName = this.getIndexName(region, baseIndex);
@@ -209,7 +284,10 @@ export class MultiRegionOpenSearchService {
         query: query,
       };
       
-      return await client.search({ index: indexName, body });
+      return await client.search({ 
+        index: indexName, 
+        body 
+      } as OpenSearchSearchParams);
     } catch (e) {
       this.logger.error(`Failed to search in region ${region}:`, e);
       throw e;
@@ -218,7 +296,7 @@ export class MultiRegionOpenSearchService {
 
   // ===== INDEX OPERATIONS =====
 
-  async createIndex(region: string, baseIndex: string, fields: IField[]): Promise<any> {
+  async createIndex(region: string, baseIndex: string, fields: IField[]): Promise<OpenSearchResponse> {
     try {
       const client = this.getClient(region);
       const indexName = this.getIndexName(region, baseIndex);
@@ -228,12 +306,12 @@ export class MultiRegionOpenSearchService {
       const fieldsList = fields.reduce(
         (obj, item) =>
           Object.assign(obj, { [item.fieldName]: { type: item.type } }),
-        {},
+        {} as Record<string, unknown>,
       );
       
       const existsStatus = await client.indices.exists({
         index: indexName,
-      });
+      } as OpenSearchIndexExistsParams);
 
       if (existsStatus && existsStatus.statusCode === 200) {
         return client.indices.putMapping({
@@ -250,7 +328,7 @@ export class MultiRegionOpenSearchService {
               properties: fieldsList,
             },
           },
-        });
+        } as OpenSearchCreateIndexParams);
       }
     } catch (e) {
       this.logger.error(`Failed to create index in region ${region}:`, e);
@@ -258,7 +336,7 @@ export class MultiRegionOpenSearchService {
     }
   }
 
-  async deleteIndex(region: string, baseIndex: string): Promise<any> {
+  async deleteIndex(region: string, baseIndex: string): Promise<OpenSearchResponse> {
     try {
       const client = this.getClient(region);
       const indexName = this.getIndexName(region, baseIndex);
@@ -267,7 +345,7 @@ export class MultiRegionOpenSearchService {
       
       return await client.indices.delete({
         index: indexName,
-      });
+      } as OpenSearchDeleteIndexParams);
     } catch (e) {
       this.logger.error(`Failed to delete index in region ${region}:`, e);
       throw e;
@@ -281,7 +359,7 @@ export class MultiRegionOpenSearchService {
       
       const response = await client.indices.exists({
         index: indexName,
-      });
+      } as OpenSearchIndexExistsParams);
       return response.statusCode === 200;
     } catch (e) {
       this.logger.error(`Failed to check if index exists in region ${region}:`, e);
@@ -318,9 +396,10 @@ export class MultiRegionOpenSearchService {
       results.forEach((result, index) => {
         const region = targetRegions[index];
         if (result.status === 'fulfilled') {
-          combinedResults.regions[region] = result.value.body;
-          combinedResults.total += result.value.body.hits?.total?.value || 0;
-          combinedResults.hits.push(...(result.value.body.hits?.hits || []));
+          const searchResult = result.value.body as unknown as OpenSearchSearchResult;
+          combinedResults.regions[region] = searchResult;
+          combinedResults.total += searchResult.hits?.total?.value || 0;
+          combinedResults.hits.push(...(searchResult.hits?.hits || []));
         } else {
           this.logger.error(`Search failed for region ${region}:`, result.reason);
           combinedResults.regions[region] = { error: result.reason.message };
@@ -336,9 +415,9 @@ export class MultiRegionOpenSearchService {
 
   async bulkInsertAcrossRegions(
     baseIndex: string,
-    docs: any[],
+    docs: Record<string, unknown>[],
     regions?: string[]
-  ): Promise<any> {
+  ): Promise<Record<string, unknown>> {
     try {
       const targetRegions = regions || Object.keys(this.config.regions);
       const insertPromises = targetRegions.map(region => 
@@ -371,7 +450,7 @@ export class MultiRegionOpenSearchService {
 
   // ===== UTILITY METHODS =====
 
-  generateQuery(q: string, queryType: string, fields: string[]) {
+  generateQuery(q: string, queryType: string, fields: string[]): Record<string, unknown> {
     if (queryType === 'SimpleQuery') {
       return {
         multi_match: {
@@ -398,19 +477,19 @@ export class MultiRegionOpenSearchService {
 
   // ===== REQUEST-BASED OPERATIONS =====
 
-  async addDocumentByRequest(request: IRegionRequest, baseIndex: string, document: any, documentId?: string): Promise<any> {
+  async addDocumentByRequest(request: IRegionRequest, baseIndex: string, document: Record<string, unknown>, documentId?: string): Promise<OpenSearchResponse> {
     return this.addDocument(request.region, baseIndex, document, documentId);
   }
 
-  async getDocumentByRequest(request: IRegionRequest, baseIndex: string, documentId: string): Promise<any> {
+  async getDocumentByRequest(request: IRegionRequest, baseIndex: string, documentId: string): Promise<Record<string, unknown>> {
     return this.getDocument(request.region, baseIndex, documentId);
   }
 
-  async updateDocumentByRequest(request: IRegionRequest, baseIndex: string, documentId: string, document: any): Promise<any> {
+  async updateDocumentByRequest(request: IRegionRequest, baseIndex: string, documentId: string, document: Record<string, unknown>): Promise<OpenSearchResponse> {
     return this.updateDocument(request.region, baseIndex, documentId, document);
   }
 
-  async deleteDocumentByRequest(request: IRegionRequest, baseIndex: string, documentId: string): Promise<any> {
+  async deleteDocumentByRequest(request: IRegionRequest, baseIndex: string, documentId: string): Promise<OpenSearchResponse> {
     return this.deleteDocument(request.region, baseIndex, documentId);
   }
 
@@ -422,7 +501,7 @@ export class MultiRegionOpenSearchService {
     limit: number,
     queryType: string,
     fields: string[]
-  ): Promise<any> {
+  ): Promise<OpenSearchResponse> {
     return this.searchIndex(request.region, baseIndex, q, skip, limit, queryType, fields);
   }
 } 

@@ -1,6 +1,6 @@
 {
   "name": "@alti-js/nestjs-elasticsearch",
-  "version": "0.5.3",
+  "version": "0.5.5",
   "description": "Elasticsearch and OpenSearch integration with NestJS - Dual engine support with unified API and multi-region capabilities",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

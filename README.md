@@ -6,7 +6,7 @@
     <img src="https://cdn.worldvectorlogo.com/logos/elasticsearch.svg" alt="Elasticsearch Logo" width="125" height="125">
   </a>
   <a href="https://opensearch.org/">
-    <img src="https://opensearch.org/assets/brand/PNG/Logo/OpenSearch_Logo/Horizontal/OpenSearch_Horizontal_Logo.png" alt="OpenSearch Logo" width="200" height="80">
+    <img src="https://opensearch.org/wp-content/uploads/2024/08/opensearch_logo_default.svg" alt="OpenSearch Logo" width="200" height="80">
   </a>
 </p>
 

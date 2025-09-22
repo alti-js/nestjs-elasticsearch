@@ -2,7 +2,6 @@ import { Injectable, Inject, Logger } from '@nestjs/common';
 import { Client } from '@opensearch-project/opensearch';
 import { 
   IMultiRegionOpenSearchConfig, 
-  Region, 
   IClusterConfig,
   IRegionRequest 
 } from '../../models/dtos/multi-region-config.dto';

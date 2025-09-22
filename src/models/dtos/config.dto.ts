@@ -10,7 +10,7 @@ export interface IElasticSearchConfig {
   node: string;
   port: string;
   auth: IAuthConfigOptions;
-  models?: (new (data?: any) => any)[];
+  models?: (new (...args: unknown[]) => unknown)[];
   engine?: SearchEngineType;
 }
 
@@ -19,7 +19,7 @@ export interface IOpenSearchConfig {
   node: string;
   port: string;
   auth: IAuthConfigOptions;
-  models?: (new (data?: any) => any)[];
+  models?: (new (...args: unknown[]) => unknown)[];
   engine: 'opensearch';
 }
 

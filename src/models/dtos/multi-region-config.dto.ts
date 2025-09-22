@@ -7,7 +7,7 @@ export interface IClusterConfig {
   port: string;
   auth: IAuthConfigOptions;
   index?: string;
-  models?: (new (data?: any) => any)[];
+  models?: (new (...args: unknown[]) => unknown)[];
 }
 
 export interface IMultiRegionOpenSearchConfig {
@@ -17,7 +17,7 @@ export interface IMultiRegionOpenSearchConfig {
   };
   defaultRegion?: string;
   indexPrefix?: string;
-  models?: (new (data?: any) => any)[];
+  models?: (new (...args: unknown[]) => unknown)[];
 }
 
 export interface IMultiRegionElasticSearchConfig {
@@ -27,12 +27,12 @@ export interface IMultiRegionElasticSearchConfig {
   };
   defaultRegion?: string;
   indexPrefix?: string;
-  models?: (new (data?: any) => any)[];
+  models?: (new (...args: unknown[]) => unknown)[];
 }
 
 export type MultiRegionSearchConfig = IMultiRegionOpenSearchConfig | IMultiRegionElasticSearchConfig;
 
 export interface IRegionRequest {
   region: string;
-  [key: string]: any;
+  [key: string]: unknown;
 } 

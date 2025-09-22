@@ -1,8 +1,17 @@
 import { IField } from '../dtos/field.dto';
+import { 
+  CreateIndexResponse, 
+  BulkResponse, 
+  SearchResponse, 
+  UpdateByQueryResponse, 
+  ReindexResponse,
+  SearchQuery,
+  SearchDocument
+} from '../dtos/search-types.dto';
 
 export interface ISearchService {
-  createIndex(indexName: string, fields: IField[]): Promise<any>;
-  bulkInsert(docs: any[], index: string, type: string): Promise<any>;
+  createIndex(indexName: string, fields: IField[]): Promise<CreateIndexResponse>;
+  bulkInsert(docs: SearchDocument[], index: string, type: string): Promise<BulkResponse>;
   searchIndex(
     q: string,
     index: string,
@@ -10,17 +19,17 @@ export interface ISearchService {
     limit: number,
     queryType: string,
     fields: string[],
-  ): Promise<any>;
+  ): Promise<SearchResponse>;
   updateIndex(
     index: string,
-    query: any,
-    updatedFields: any,
-  ): Promise<any>;
-  removeDocumentFromIndex(indexName: string, query: any): Promise<any>;
+    query: SearchQuery,
+    updatedFields: Record<string, unknown>,
+  ): Promise<UpdateByQueryResponse>;
+  removeDocumentFromIndex(indexName: string, query: SearchQuery): Promise<UpdateByQueryResponse>;
   reindex(
     indexFrom: string,
     indexDest: string,
-    query: any,
-  ): Promise<any>;
-  generateQuery(q: string, queryType: string, fields: string[]): any;
+    query: SearchQuery,
+  ): Promise<ReindexResponse>;
+  generateQuery(q: string, queryType: string, fields: string[]): SearchQuery;
 } 

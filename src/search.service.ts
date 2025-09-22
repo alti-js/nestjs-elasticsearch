@@ -1,6 +1,16 @@
 import { Injectable, Inject, Logger } from '@nestjs/common';
 import { SearchConfig, SearchEngineType } from './models/dtos/config.dto';
 import { ISearchService } from './models/core/base-search.service';
+import { IField } from './models/dtos/field.dto';
+import { 
+  CreateIndexResponse, 
+  BulkResponse, 
+  SearchResponse, 
+  UpdateByQueryResponse, 
+  ReindexResponse,
+  SearchQuery,
+  SearchDocument
+} from './models/dtos/search-types.dto';
 import { ElasticsearchService } from './elasticsearch.service';
 import { OpenSearchService } from './services/opensearch/opensearch.service';
 
@@ -23,11 +33,11 @@ export class SearchService implements ISearchService {
     this.logger.log(`Initialized SearchService with engine: ${this.engineType}`);
   }
 
-  async createIndex(indexName: string, fields: any[]): Promise<any> {
+  async createIndex(indexName: string, fields: IField[]): Promise<CreateIndexResponse> {
     return this.searchService.createIndex(indexName, fields);
   }
 
-  async bulkInsert(docs: any[], index: string, type: string): Promise<any> {
+  async bulkInsert(docs: SearchDocument[], index: string, type: string): Promise<BulkResponse> {
     return this.searchService.bulkInsert(docs, index, type);
   }
 
@@ -38,31 +48,31 @@ export class SearchService implements ISearchService {
     limit: number,
     queryType: string,
     fields: string[],
-  ): Promise<any> {
+  ): Promise<SearchResponse> {
     return this.searchService.searchIndex(q, index, skip, limit, queryType, fields);
   }
 
   async updateIndex(
     index: string,
-    query: any,
-    updatedFields: any,
-  ): Promise<any> {
+    query: SearchQuery,
+    updatedFields: Record<string, unknown>,
+  ): Promise<UpdateByQueryResponse> {
     return this.searchService.updateIndex(index, query, updatedFields);
   }
 
-  async removeDocumentFromIndex(indexName: string, query: any): Promise<any> {
+  async removeDocumentFromIndex(indexName: string, query: SearchQuery): Promise<UpdateByQueryResponse> {
     return this.searchService.removeDocumentFromIndex(indexName, query);
   }
 
   async reindex(
     indexFrom: string,
     indexDest: string,
-    query: any,
-  ): Promise<any> {
+    query: SearchQuery,
+  ): Promise<ReindexResponse> {
     return this.searchService.reindex(indexFrom, indexDest, query);
   }
 
-  generateQuery(q: string, queryType: string, fields: string[]) {
+  generateQuery(q: string, queryType: string, fields: string[]): SearchQuery {
     return this.searchService.generateQuery(q, queryType, fields);
   }
 

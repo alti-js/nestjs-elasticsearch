@@ -40,7 +40,9 @@ export class IndexManagerService {
       if (this.options.models) {
         const models: (new <T extends BaseDocument<any>>(
           client: elasticsearch.Client,
-        ) => T)[] = this.options.models;
+        ) => T)[] = this.options.models as (new <T extends BaseDocument<any>>(
+          client: elasticsearch.Client,
+        ) => T)[];
         for (const model of models) {
           const metadata = model.prototype;
           model.prototype.client = this.esclient;

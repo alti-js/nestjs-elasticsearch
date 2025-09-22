@@ -80,7 +80,7 @@ describe('SearchService', () => {
   });
 
   it('should delegate createIndex to elasticsearch service when engine is elasticsearch', async () => {
-    const mockFields = [{ fieldName: 'title', type: 'text' }];
+    const mockFields = [{ fieldName: 'title', type: 'text' as const }];
     await service.createIndex('test-index', mockFields);
     expect(elasticsearchService.createIndex).toHaveBeenCalledWith('test-index', mockFields);
   });

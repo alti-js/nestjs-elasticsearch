@@ -31,14 +31,15 @@ export class ElasticsearchService implements ISearchService {
       });
 
       if (existsStatus && existsStatus.statusCode === 200) {
-        return this.esclient.indices.putMapping({
+        const result = await this.esclient.indices.putMapping({
           index: indexName,
           body: {
             properties: fieldsList,
           },
         });
+        return result.body;
       } else {
-        return this.esclient.indices.create({
+        const result = await this.esclient.indices.create({
           index: indexName,
           body: {
             mappings: {
@@ -46,6 +47,7 @@ export class ElasticsearchService implements ISearchService {
             },
           },
         });
+        return result.body;
       }
     } catch (e) {
       this.logger.error(e);
@@ -53,7 +55,7 @@ export class ElasticsearchService implements ISearchService {
     }
   }
 
-  async bulkInsert(docs: any[], index: string, type: string): Promise<any> {
+  async bulkInsert(docs: any[], index: string, _type: string): Promise<any> {
     const bulk = [];
     docs.forEach((doc) => {
       bulk.push({
@@ -62,9 +64,10 @@ export class ElasticsearchService implements ISearchService {
       bulk.push(doc);
     });
     try {
-      return this.esclient.bulk({
+      const result = await this.esclient.bulk({
         body: bulk,
       });
+      return result.body;
     } catch (e) {
       this.logger.error(e);
       throw e;

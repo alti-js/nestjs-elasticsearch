@@ -1,4 +1,4 @@
-import { DynamicModule, Global, Module, OnModuleInit } from '@nestjs/common';
+import { DynamicModule, Global, Module, OnModuleInit, Provider } from '@nestjs/common';
 import { ElasticsearchService } from './elasticsearch.service';
 import { OpenSearchService } from './services/opensearch/opensearch.service';
 import { SearchService } from './search.service';
@@ -20,7 +20,7 @@ export class ElasticsearchModule implements OnModuleInit {
   }
 
   static forRoot(config: SearchConfig): DynamicModule {
-    const providers = [];
+    const providers: Provider[] = [];
     const engine = config.engine || 'elasticsearch';
 
     if (engine === 'opensearch') {

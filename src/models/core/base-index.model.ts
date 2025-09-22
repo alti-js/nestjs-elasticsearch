@@ -101,7 +101,7 @@ export class BaseDocument<T extends IDoc> {
         body: this.toObject(),
       });
 
-      this.apply(response.body as T);
+      this.apply(response.body);
       return this;
     } catch (e) {
       (this.constructor.prototype.logger as Logger).error(e);
@@ -120,7 +120,7 @@ export class BaseDocument<T extends IDoc> {
         refresh: true,
         body: { doc: this.toObject() },
       });
-      this.apply(response.body as T);
+      this.apply(response.body);
       return this;
     } catch (e) {
       (this.constructor.prototype.logger as Logger).error(e);
@@ -248,7 +248,7 @@ export class BaseDocument<T extends IDoc> {
         },
       };
     } else {
-      const filter: ESObjectFilter<T> = params as ESObjectFilter<T>;
+      const filter: ESObjectFilter<T> = params;
       if (Object.keys(filter).length === 1) {
         return {
           match: filter,

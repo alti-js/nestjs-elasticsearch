@@ -1,4 +1,4 @@
-import { IAuthConfigOptions, SearchEngineType } from './config.dto';
+import { IAuthConfigOptions } from './config.dto';
 
 export type Region = string;
 

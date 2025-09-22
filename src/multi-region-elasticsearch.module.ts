@@ -1,4 +1,4 @@
-import { DynamicModule, Global, Module, OnModuleInit } from '@nestjs/common';
+import { DynamicModule, Global, Module, OnModuleInit, Provider } from '@nestjs/common';
 import { MultiRegionOpenSearchService } from './services/opensearch/multi-region-opensearch.service';
 import { MultiRegionSearchConfig } from './models/dtos/multi-region-config.dto';
 
@@ -10,7 +10,7 @@ export class MultiRegionElasticsearchModule implements OnModuleInit {
   ) {}
 
   static forRoot(config: MultiRegionSearchConfig): DynamicModule {
-    const providers = [];
+    const providers: Provider[] = [];
 
     if (config.engine === 'opensearch') {
       providers.push(
@@ -33,7 +33,7 @@ export class MultiRegionElasticsearchModule implements OnModuleInit {
     };
   }
 
-  async onModuleInit(): Promise<void> {
+  onModuleInit(): void {
     // Initialize all region clients
     const regions = this.multiRegionOpenSearchService.getAvailableRegions();
     console.log(`Multi-region module initialized with regions: ${regions.join(', ')}`);

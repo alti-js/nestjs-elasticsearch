@@ -5,6 +5,7 @@ export * from './services/opensearch/opensearch.service';
 export * from './services/opensearch/enhanced-opensearch.service';
 export * from './models/dtos/config.dto';
 export * from './models/dtos/field.dto';
+export * from './models/dtos/search-types.dto';
 export * from './models/core/base-index.model';
 export * from './models/core/base-search.service';
 export * from './models/core/enhanced-search.service';

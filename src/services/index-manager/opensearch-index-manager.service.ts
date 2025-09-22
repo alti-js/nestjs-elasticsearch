@@ -43,7 +43,9 @@ export class OpenSearchIndexManagerService {
       if (this.options.models) {
         const models: (new <T extends BaseDocument<any>>(
           client: Client,
-        ) => T)[] = this.options.models;
+        ) => T)[] = this.options.models as (new <T extends BaseDocument<any>>(
+          client: Client,
+        ) => T)[];
         for (const model of models) {
           const metadata = model.prototype;
           model.prototype.client = this.client;

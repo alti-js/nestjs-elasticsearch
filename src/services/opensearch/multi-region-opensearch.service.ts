@@ -107,14 +107,14 @@ export class MultiRegionOpenSearchService {
   private initializeClients(): void {
     Object.entries(this.config.regions).forEach(([region, clusterConfig]) => {
       const client = new Client({
-        node: `${clusterConfig.node}:${clusterConfig.port}`,
+        node: `${clusterConfig.node}`,
         auth: {
           username: clusterConfig.auth.username,
           password: clusterConfig.auth.password,
         },
       });
       this.clients.set(region, client);
-      this.logger.log(`Initialized OpenSearch client for region: ${region}`);
+      this.logger.log(`Initialized OpenSearch client for region: ${region}, host: ${clusterConfig.node}`);
     });
   }
 

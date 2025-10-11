@@ -32,4 +32,5 @@ export interface ISearchService {
     query: SearchQuery,
   ): Promise<ReindexResponse>;
   generateQuery(q: string, queryType: string, fields: string[]): SearchQuery;
+  documentExists(indexName: string, documentId: string): Promise<boolean>;
 } 

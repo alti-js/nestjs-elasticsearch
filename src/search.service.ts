@@ -76,6 +76,10 @@ export class SearchService implements ISearchService {
     return this.searchService.generateQuery(q, queryType, fields);
   }
 
+  async documentExists(indexName: string, documentId: string): Promise<boolean> {
+    return this.searchService.documentExists(indexName, documentId);
+  }
+
   getEngineType(): SearchEngineType {
     return this.engineType;
   }

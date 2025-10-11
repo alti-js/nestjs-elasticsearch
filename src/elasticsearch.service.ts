@@ -161,6 +161,19 @@ export class ElasticsearchService implements ISearchService {
     }
   }
 
+  async documentExists(indexName: string, documentId: string): Promise<boolean> {
+    try {
+      const response = await this.esclient.exists({
+        index: indexName,
+        id: documentId,
+      });
+      return response.statusCode === 200;
+    } catch (e) {
+      this.logger.error(`Failed to check if document ${documentId} exists in index ${indexName}:`, e);
+      return false;
+    }
+  }
+
   generateQuery(q: string, queryType: string, fields: string[]) {
     if (queryType === 'SimpleQuery') {
       return {

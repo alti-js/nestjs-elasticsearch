@@ -54,6 +54,11 @@ interface OpenSearchIndexExistsParams {
   index: string;
 }
 
+interface OpenSearchExistsParams {
+  index: string;
+  id: string;
+}
+
 interface OpenSearchDeleteIndexParams {
   index: string;
 }
@@ -362,6 +367,25 @@ export class MultiRegionOpenSearchService {
       return response.statusCode === 200;
     } catch (e) {
       this.logger.error(`Failed to check if index exists in region ${region}:`, e);
+      return false;
+    }
+  }
+
+  async documentExists(region: string, baseIndex: string, documentId: string): Promise<boolean> {
+    try {
+      const client = this.getClient(region);
+      const indexName = this.getIndexName(region, baseIndex);
+      
+      this.logger.log(`Checking if document ${documentId} exists in region: ${region}, index: ${indexName}`);
+      
+      const response = await client.exists({
+        index: indexName,
+        id: documentId,
+      } as OpenSearchExistsParams);
+      
+      return response.statusCode === 200;
+    } catch (e) {
+      this.logger.error(`Failed to check if document ${documentId} exists in region ${region}:`, e);
       return false;
     }
   }

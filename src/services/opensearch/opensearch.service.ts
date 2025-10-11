@@ -429,4 +429,17 @@ export class OpenSearchService implements ISearchService {
       ...options,
     };
   }
+
+  async documentExists(indexName: string, documentId: string): Promise<boolean> {
+    try {
+      const response = await this.client.exists({
+        index: indexName,
+        id: documentId,
+      });
+      return response.statusCode === 200;
+    } catch (e) {
+      this.logger.error(`Failed to check if document ${documentId} exists in index ${indexName}:`, e);
+      return false;
+    }
+  }
 } 

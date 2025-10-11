@@ -57,6 +57,9 @@ export interface IEnhancedSearchService {
   deleteAlias(indexName: string, aliasName: string): Promise<AliasResponse>;
   getAliases(indexName?: string): Promise<GetAliasesResponse>;
   
+  // Document operations
+  documentExists(indexName: string, documentId: string): Promise<boolean>;
+  
   // Index Template operations
   createIndexTemplate(templateName: string, template: Record<string, unknown>): Promise<IndexTemplateResponse>;
   deleteIndexTemplate(templateName: string): Promise<OperationResponse>;

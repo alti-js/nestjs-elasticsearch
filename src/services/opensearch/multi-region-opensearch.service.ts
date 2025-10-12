@@ -383,7 +383,7 @@ export class MultiRegionOpenSearchService {
         id: documentId,
       } as OpenSearchExistsParams);
       
-      return response.statusCode === 200;
+      return response.body === true;
     } catch (e) {
       this.logger.error(`Failed to check if document ${documentId} exists in region ${region}:`, e);
       return false;
